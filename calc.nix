@@ -71,6 +71,20 @@ let
             output =  currentOutput ++ [ newToken ];
             operators = operators;
         }
+    else if newToken == "(" then
+        {
+            output = currentOutput;
+            operators = [ newToken ] ++ operators;
+        }
+    else if newToken == ")" then
+        let
+            top = builtins.head operators;
+            rest = builtins.tail operators;
+        in
+            if top == "(" then
+                { output = currentOutput; operators = rest; } # Nawiasy się kasują
+            else
+                manageOutputAndOperators newToken rest (currentOutput ++ [ top ])
     else
     if operators == [] then
         {
@@ -82,7 +96,12 @@ let
             topOperator = builtins.head operators;
             restOperators = builtins.tail operators;
         in
-        if getPriority newToken > getPriority topOperator then
+        if topOperator == "(" then
+            {
+                output = currentOutput;
+                operators = [ newToken ] ++ operators;
+            }
+        else if getPriority newToken > getPriority topOperator then
             {
                 output = currentOutput;
                 operators =  [newToken] ++ operators;
